@@ -1,0 +1,484 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "nkandusydneychongo@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidAboutContent(data) {
+      return hasRequiredFields(['title', 'description']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 5000;
+    }
+
+    function isValidSiteSettings(data) {
+      return hasRequiredFields(['projectsDelivered', 'clientSatisfaction', 'linesOfCode', 'globalReach']) &&
+             data.projectsDelivered is string &&
+             data.clientSatisfaction is string &&
+             data.linesOfCode is string &&
+             data.globalReach is string;
+    }
+
+    function isValidService(data) {
+      return hasRequiredFields(['title', 'description']) &&
+             data.title is string && data.title.size() < 100 &&
+             data.description is string && data.description.size() < 1000;
+    }
+
+    function isValidProduct(data) {
+      return hasRequiredFields(['title', 'description']) &&
+             data.title is string && data.title.size() < 100 &&
+             data.description is string && data.description.size() < 1000;
+    }
+
+    function isValidCaseStudy(data) {
+      return hasRequiredFields(['title', 'client', 'description']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.client is string && data.client.size() < 100 &&
+             data.description is string && data.description.size() < 5000;
+    }
+
+    function isValidTeamMember(data) {
+      return hasRequiredFields(['name', 'role', 'departmentId']) &&
+             data.name is string && data.name.size() < 100 &&
+             data.role is string && data.role.size() < 100 &&
+             data.departmentId is string &&
+             (!('image' in data) || data.image is string) &&
+             (!('bio' in data) || data.bio is string) &&
+             (!('quote' in data) || data.quote is string) &&
+             (!('order' in data) || data.order is number) &&
+             (!('socialLinks' in data) || data.socialLinks is map);
+    }
+
+    function isValidDepartment(data) {
+      return hasRequiredFields(['name', 'order']) &&
+             data.name is string && data.name.size() < 100 &&
+             data.order is number &&
+             (!('description' in data) || data.description is string) &&
+             (!('isActive' in data) || data.isActive is bool) &&
+             (!('layoutType' in data) || data.layoutType in ['timeline', 'grid']);
+    }
+
+    function isValidTeamInvite(data) {
+      return hasRequiredFields(['email', 'role', 'ownerId', 'status']) &&
+             data.email is string && data.email.size() < 100 &&
+             data.role is string &&
+             data.ownerId is string &&
+             data.status in ['Pending', 'Accepted', 'Declined'];
+    }
+
+    function isValidAttendance(data) {
+      return hasRequiredFields(['memberId', 'type', 'timestamp']) &&
+             data.memberId is string &&
+             data.type in ['active', 'away', 'inactive'] &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidAuditLog(data) {
+      return hasRequiredFields(['adminId', 'action', 'timestamp']) &&
+             data.adminId is string &&
+             data.action is string &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidTask(data) {
+      return hasRequiredFields(['title', 'project', 'status', 'priority']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.project is string && data.project.size() < 100 &&
+             data.status in ['Pending', 'In Progress', 'In Review', 'Review', 'Completed'] &&
+             data.priority in ['Low', 'Medium', 'High', 'Critical'];
+    }
+
+    function isValidChannel(data) {
+      return hasRequiredFields(['name', 'type']) &&
+             data.name is string && data.name.size() < 50 &&
+             data.type in ['public', 'private'];
+    }
+
+    function isValidMessage(data) {
+      return hasRequiredFields(['senderId', 'text', 'timestamp', 'projectId']) &&
+             data.senderId is string &&
+             data.text is string && data.text.size() < 2000 &&
+             (data.timestamp is timestamp || data.timestamp is string) &&
+             data.projectId is string;
+    }
+
+    function isValidConferenceParticipant(data) {
+      return hasRequiredFields(['userId', 'name', 'joinedAt']) &&
+             data.userId is string &&
+             data.name is string &&
+             data.joinedAt is string;
+    }
+
+    function isValidClient(data) {
+      return hasRequiredFields(['name', 'email', 'company']) &&
+             data.name is string && data.name.size() < 100 &&
+             data.email is string && data.email.size() < 100 &&
+             data.company is string && data.company.size() < 100;
+    }
+
+    function isValidProject(data) {
+      return hasRequiredFields(['name', 'clientId', 'status']) &&
+             data.name is string && data.name.size() < 200 &&
+             data.clientId is string &&
+             data.status in ['Active', 'On Hold', 'Completed', 'Maintenance'];
+    }
+
+    function isValidProposal(data) {
+      return hasRequiredFields(['title', 'clientId', 'status']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.clientId is string &&
+             data.status in ['Draft', 'Sent', 'Approved', 'Converted'];
+    }
+
+    function isValidChangeRequest(data) {
+      return hasRequiredFields(['projectId', 'title', 'status']) &&
+             data.projectId is string &&
+             data.title is string && data.title.size() < 200 &&
+             data.status in ['Pending', 'Approved', 'Rejected'];
+    }
+
+    function isValidClientRequest(data) {
+      return hasRequiredFields(['projectId', 'type', 'title', 'status']) &&
+             data.projectId is string &&
+             data.type in ['Bug', 'Feature', 'Change', 'Support', 'Urgent'] &&
+             data.title is string && data.title.size() < 200 &&
+             data.status in ['New', 'In Review', 'Planned', 'In Progress', 'Resolved'];
+    }
+
+    function isValidDeliverable(data) {
+      return hasRequiredFields(['projectId', 'title', 'type']) &&
+             data.projectId is string &&
+             data.title is string && data.title.size() < 200 &&
+             data.type in ['File', 'Link', 'Credential', 'Manual', 'Video'];
+    }
+
+    function isValidQAIssue(data) {
+      return hasRequiredFields(['projectId', 'title', 'status']) &&
+             data.projectId is string &&
+             data.title is string && data.title.size() < 200 &&
+             data.status in ['Open', 'Fixed', 'Verified', 'Closed'];
+    }
+
+    function isValidWaitingOnClient(data) {
+      return hasRequiredFields(['projectId', 'title', 'type', 'status']) &&
+             data.projectId is string &&
+             data.title is string && data.title.size() < 200 &&
+             data.type in ['Feedback', 'Approval', 'Content', 'Payment', 'Credentials', 'Documents'] &&
+             data.status in ['Pending', 'Resolved'];
+    }
+
+    function isValidInvoice(data) {
+      return hasRequiredFields(['projectId', 'clientId', 'invoiceNumber', 'total', 'status']) &&
+             data.projectId is string &&
+             data.clientId is string &&
+             data.invoiceNumber is string &&
+             data.total is number &&
+             data.status in ['Draft', 'Sent', 'Paid', 'Overdue', 'Cancelled'] &&
+             (!('items' in data) || data.items is list) &&
+             (!('subtotal' in data) || data.subtotal is number) &&
+             (!('tax' in data) || data.tax is number);
+    }
+
+    function isValidTransaction(data) {
+      return hasRequiredFields(['type', 'amount', 'date']) &&
+             data.type in ['Revenue', 'Expense'] &&
+             data.amount is number &&
+             data.date is string;
+    }
+
+    function isValidProjectFile(data) {
+      return hasRequiredFields(['projectId', 'name', 'url']) &&
+             data.projectId is string &&
+             data.name is string && data.name.size() < 200 &&
+             data.url is string && data.url.size() < 1000;
+    }
+
+    function isValidOnboarding(data) {
+      return hasRequiredFields(['clientId', 'completedSteps']) &&
+             data.clientId is string &&
+             data.completedSteps is list;
+    }
+
+    function isValidNotification(data) {
+      return hasRequiredFields(['userId', 'title', 'message', 'type', 'read', 'timestamp']) &&
+             data.userId is string &&
+             data.title is string && data.title.size() < 200 &&
+             data.message is string && data.message.size() < 1000 &&
+             data.type in ['info', 'success', 'warning', 'error'] &&
+             data.read is bool &&
+             (data.timestamp is timestamp || data.timestamp is string);
+    }
+
+    function isValidMeeting(data) {
+      return hasRequiredFields(['title', 'hostId', 'status', 'startTime']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.hostId is string &&
+             data.status in ['scheduled', 'active', 'completed'] &&
+             (data.startTime is timestamp || data.startTime is string);
+    }
+
+    function isValidMeetingMessage(data) {
+      return hasRequiredFields(['meetingId', 'senderId', 'text', 'timestamp']) &&
+             data.meetingId is string &&
+             data.senderId is string &&
+             data.text is string && data.text.size() < 2000 &&
+             (data.timestamp is timestamp || data.timestamp is string);
+    }
+
+    function isValidMeetingParticipant(data) {
+      return hasRequiredFields(['userId', 'peerId', 'name', 'joinedAt']) &&
+             data.userId is string &&
+             data.peerId is string &&
+             data.name is string &&
+             (data.joinedAt is timestamp || data.joinedAt is string);
+    }
+
+    function isValidSettings(data) {
+      return (!('notifications' in data) || data.notifications is map) &&
+             (!('twoFactorEnabled' in data) || data.twoFactorEnabled is bool) &&
+             (!('twoFactorSecret' in data) || data.twoFactorSecret is string) &&
+             (!('billing' in data) || data.billing is map) &&
+             (!('profile' in data) || data.profile is map);
+    }
+
+    function isValidContactMessage(data) {
+      return hasRequiredFields(['name', 'email', 'message', 'status', 'createdAt']) &&
+             data.name is string && data.name.size() < 100 &&
+             data.email is string && data.email.size() < 100 &&
+             (!('subject' in data) || (data.subject is string && data.subject.size() < 200)) &&
+             data.message is string && data.message.size() < 5000 &&
+             data.status in ['new', 'read', 'replied'] &&
+             data.createdAt is string &&
+             (!('reply' in data) || (data.reply is string && data.reply.size() < 5000));
+    }
+
+    // ===============================================================
+    // Match Rules
+    // ===============================================================
+    
+    match /clients/{clientId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidClient(request.resource.data);
+    }
+
+    match /content/about {
+      allow read: if true;
+      allow write: if isAdmin() && isValidAboutContent(request.resource.data);
+    }
+
+    match /content/settings {
+      allow read: if true;
+      allow write: if isAdmin() && isValidSiteSettings(request.resource.data);
+    }
+
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidService(request.resource.data);
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidProduct(request.resource.data);
+    }
+
+    match /caseStudies/{caseStudyId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidCaseStudy(request.resource.data);
+    }
+
+    match /team/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidTeamMember(request.resource.data);
+    }
+
+    match /team_members/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidTeamMember(request.resource.data);
+    }
+
+    match /departments/{deptId} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidDepartment(request.resource.data);
+    }
+
+    match /team_invites/{inviteId} {
+      allow read: if isAuthenticated() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid && isValidTeamInvite(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid && isValidTeamInvite(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /attendance/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidAttendance(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidAuditLog(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidTask(request.resource.data);
+    }
+
+    match /channels/{channelId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidChannel(request.resource.data);
+    }
+
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /conference_participants/{participantId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidConferenceParticipant(request.resource.data);
+    }
+
+    match /conference_messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidProject(request.resource.data);
+    }
+
+    match /proposals/{proposalId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidProposal(request.resource.data);
+    }
+
+    match /changeRequests/{requestId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidChangeRequest(request.resource.data);
+    }
+
+    match /clientRequests/{requestId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidClientRequest(request.resource.data);
+    }
+
+    match /deliverables/{deliverableId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidDeliverable(request.resource.data);
+    }
+
+    match /qaIssues/{issueId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidQAIssue(request.resource.data);
+    }
+
+    match /waitingOnClient/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidWaitingOnClient(request.resource.data);
+    }
+
+    match /invoices/{invoiceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidInvoice(request.resource.data);
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin() && isValidTransaction(request.resource.data);
+    }
+
+    match /projectFiles/{fileId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidProjectFile(request.resource.data);
+    }
+
+    match /onboarding/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidOnboarding(request.resource.data);
+    }
+
+    match /settings/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidSettings(request.resource.data);
+    }
+
+    match /contactMessages/{messageId} {
+      allow read: if isAdmin();
+      allow create: if true && isValidContactMessage(request.resource.data);
+      allow update: if isAdmin() && isValidContactMessage(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && (isOwner(request.resource.data.userId) || isAdmin()) && isValidNotification(request.resource.data);
+      allow update: if isAuthenticated() && isOwner(resource.data.userId) && isValidNotification(request.resource.data);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+
+    match /meetings/{meetingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidMeeting(request.resource.data);
+      
+      match /participants/{participantId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && isValidMeetingParticipant(request.resource.data);
+      }
+    }
+
+    match /meeting_messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidMeetingMessage(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    function isValidUser(data) {
+      return hasRequiredFields(['name', 'email', 'role']) &&
+             data.name is string && data.name.size() < 100 &&
+             data.email is string && data.email.size() < 100 &&
+             data.role in ['admin', 'client', 'manager', 'visitor'];
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() || (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == 'client');
+      allow update: if isAdmin() || (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

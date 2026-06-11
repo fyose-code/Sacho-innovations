@@ -1,0 +1,5 @@
+{
+  "name": "Sacho Innovations",
+  "description": "The parent company of Fyose, building transformative digital solutions and smart systems for the future.",
+  "requestFramePermissions": ["camera", "microphone", "display-capture"]
+}

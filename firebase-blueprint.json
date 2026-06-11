@@ -1,0 +1,483 @@
+{
+  "entities": {
+    "AboutContent": {
+      "title": "About Content",
+      "description": "Content for the About Us section",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "mission": { "type": "string" },
+        "vision": { "type": "string" }
+      },
+      "required": ["title", "description"]
+    },
+    "SiteSettings": {
+      "title": "Site Settings",
+      "description": "Global site settings and stats",
+      "type": "object",
+      "properties": {
+        "projectsDelivered": { "type": "string" },
+        "clientSatisfaction": { "type": "string" },
+        "linesOfCode": { "type": "string" },
+        "globalReach": { "type": "string" }
+      },
+      "required": ["projectsDelivered", "clientSatisfaction", "linesOfCode", "globalReach"]
+    },
+    "ContactMessage": {
+      "title": "Contact Message",
+      "description": "Messages sent through the contact form",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "read", "replied"] },
+        "createdAt": { "type": "string" },
+        "reply": { "type": "string" }
+      },
+      "required": ["name", "email", "message", "status", "createdAt"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Services offered by Sacho Innovations",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["title", "description"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Products developed by Sacho Innovations",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "image": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["name", "description"]
+    },
+    "CaseStudy": {
+      "title": "Case Study",
+      "description": "Projects and case studies",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "client": { "type": "string" },
+        "description": { "type": "string" },
+        "challenge": { "type": "string" },
+        "solution": { "type": "string" },
+        "results": { "type": "string" },
+        "image": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["title", "client", "description"]
+    },
+    "TeamMember": {
+      "title": "Team Member",
+      "description": "Sacho Innovations team members",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "email": { "type": "string" },
+        "departmentId": { "type": "string" },
+        "image": { "type": "string" },
+        "bio": { "type": "string" },
+        "quote": { "type": "string" },
+        "socialLinks": {
+          "type": "object",
+          "properties": {
+            "linkedin": { "type": "string" },
+            "twitter": { "type": "string" },
+            "github": { "type": "string" }
+          }
+        },
+        "order": { "type": "number" },
+        "status": { "type": "string", "enum": ["Active", "Away", "Inactive"] },
+        "joinedAt": { "type": "string" }
+      },
+      "required": ["name", "role", "departmentId"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "Team departments",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "order": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "layoutType": { "type": "string", "enum": ["timeline", "grid"] }
+      },
+      "required": ["name", "order"]
+    },
+    "TeamInvite": {
+      "title": "Team Invite",
+      "description": "Invitations sent to potential team members",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Accepted", "Declined"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "role", "ownerId", "status"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Tasks assigned to team members",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "project": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "In Progress", "Review", "Completed"] },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
+        "assignee": { "type": "string" },
+        "dueDate": { "type": "string" }
+      },
+      "required": ["title", "project", "status", "priority"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Messages in the communication system",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "channelId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["senderId", "text", "timestamp"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Active and pending projects",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "clientId": { "type": "string" },
+        "managerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "On Hold", "Completed", "Maintenance"] },
+        "health": { "type": "string", "enum": ["Healthy", "At Risk", "Delayed"] },
+        "progress": { "type": "number" },
+        "budget": { "type": "string" },
+        "deadline": { "type": "string" },
+        "roadmap": { "type": "array", "items": { "type": "object" } },
+        "onboardingStatus": { "type": "string", "enum": ["Pending", "In Progress", "Completed"] }
+      },
+      "required": ["name", "clientId", "status"]
+    },
+    "Proposal": {
+      "title": "Proposal",
+      "description": "Project proposals and quotations",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "clientId": { "type": "string" },
+        "scope": { "type": "string" },
+        "timeline": { "type": "string" },
+        "quotation": { "type": "number" },
+        "status": { "type": "string", "enum": ["Draft", "Sent", "Approved", "Converted"] }
+      },
+      "required": ["title", "clientId", "status"]
+    },
+    "ChangeRequest": {
+      "title": "Change Request",
+      "description": "Formal requests for scope changes",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "scopeImpact": { "type": "string" },
+        "timeImpact": { "type": "string" },
+        "costImpact": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected"] }
+      },
+      "required": ["projectId", "title", "status"]
+    },
+    "ClientRequest": {
+      "title": "Client Request",
+      "description": "Bugs, features, and support requests from clients",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "type": { "type": "string", "enum": ["Bug", "Feature", "Change", "Support", "Urgent"] },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "In Review", "Planned", "In Progress", "Resolved"] },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] }
+      },
+      "required": ["projectId", "type", "title", "status"]
+    },
+    "Deliverable": {
+      "title": "Deliverable",
+      "description": "Final files and handover assets",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["File", "Link", "Credential", "Manual", "Video"] },
+        "url": { "type": "string" },
+        "description": { "type": "string" },
+        "isHandedOver": { "type": "boolean" }
+      },
+      "required": ["projectId", "title", "type"]
+    },
+    "QAIssue": {
+      "title": "QA Issue",
+      "description": "Bugs and issues found during testing",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Open", "Fixed", "Verified", "Closed"] },
+        "severity": { "type": "string", "enum": ["Minor", "Major", "Critical"] }
+      },
+      "required": ["projectId", "title", "status"]
+    },
+    "WaitingOnClient": {
+      "title": "Waiting On Client",
+      "description": "Items blocking progress due to client action",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["Feedback", "Approval", "Content", "Payment", "Credentials", "Documents"] },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Resolved"] }
+      },
+      "required": ["projectId", "title", "type", "status"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Client companies and individuals",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "company": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Inactive", "Lead"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "email", "status"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Project invoices and billing",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "description": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "quantity": { "type": "number" },
+              "unitPrice": { "type": "number" },
+              "total": { "type": "number" }
+            },
+            "required": ["description", "quantity", "unitPrice", "total"]
+          }
+        },
+        "subtotal": { "type": "number" },
+        "tax": { "type": "number" },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["Draft", "Sent", "Paid", "Overdue", "Cancelled"] },
+        "dueDate": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["projectId", "clientId", "invoiceNumber", "total", "status"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial transactions (revenue/expenses)",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["Revenue", "Expense"] },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" },
+        "projectId": { "type": "string" },
+        "invoiceId": { "type": "string" }
+      },
+      "required": ["type", "amount", "date"]
+    },
+    "ProjectFile": {
+      "title": "Project File",
+      "description": "General files uploaded to a project",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "name": { "type": "string" },
+        "size": { "type": "string" },
+        "type": { "type": "string" },
+        "url": { "type": "string" },
+        "uploadedBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["projectId", "name", "url"]
+    },
+    "Onboarding": {
+      "title": "Onboarding",
+      "description": "Onboarding progress and data for a client",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "completedSteps": { "type": "array", "items": { "type": "string" } },
+        "formData": { "type": "object" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["clientId", "completedSteps"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "System notifications for users",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["info", "success", "warning", "error"] },
+        "read": { "type": "boolean" },
+        "link": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["userId", "title", "message", "type", "read", "timestamp"]
+    },
+    "Meeting": {
+      "title": "Meeting",
+      "description": "Virtual boardroom meeting sessions",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "hostId": { "type": "string" },
+        "hostName": { "type": "string" },
+        "status": { "type": "string", "enum": ["scheduled", "active", "completed"] },
+        "startTime": { "type": "string" },
+        "duration": { "type": "number" },
+        "type": { "type": "string", "enum": ["team", "client"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "hostId", "status", "startTime"]
+    },
+    "MeetingMessage": {
+      "title": "Meeting Message",
+      "description": "Chat messages within a meeting",
+      "type": "object",
+      "properties": {
+        "meetingId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["meetingId", "senderId", "text", "timestamp"]
+    },
+    "MeetingParticipant": {
+      "title": "Meeting Participant",
+      "description": "Participants in a meeting",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "peerId": { "type": "string" },
+        "name": { "type": "string" },
+        "joinedAt": { "type": "string" }
+      },
+      "required": ["userId", "peerId", "name", "joinedAt"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Team member attendance logs",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "type": { "type": "string", "enum": ["active", "away", "inactive"] },
+        "timestamp": { "type": "string" },
+        "time": { "type": "string" }
+      },
+      "required": ["memberId", "memberName", "type", "timestamp"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Administrative action logs",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "adminName": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "object" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["adminId", "action", "timestamp"]
+    },
+    "UserSettings": {
+      "title": "User Settings",
+      "description": "Personal settings and preferences for a user",
+      "type": "object",
+      "properties": {
+        "notifications": { "type": "object" },
+        "twoFactorEnabled": { "type": "boolean" },
+        "twoFactorSecret": { "type": "string" },
+        "billing": { "type": "object" },
+        "profile": { "type": "object" }
+      },
+      "required": []
+    }
+  },
+  "firestore": {
+    "content/about": { "schema": "AboutContent", "description": "About Us content" },
+    "content/settings": { "schema": "SiteSettings", "description": "Global site settings and stats" },
+    "contactMessages": { "schema": "ContactMessage", "description": "Messages sent through the contact form" },
+    "services": { "schema": "Service", "description": "List of services" },
+    "products": { "schema": "Product", "description": "List of products" },
+    "caseStudies": { "schema": "CaseStudy", "description": "List of case studies" },
+    "team_members": { "schema": "TeamMember", "description": "Team members list" },
+    "departments": { "schema": "Department", "description": "Team departments" },
+    "team_invites": { "schema": "TeamInvite", "description": "Team invitations" },
+    "team": { "schema": "TeamMember", "description": "Sacho Innovations internal team" },
+    "tasks": { "schema": "Task", "description": "Tasks list" },
+    "messages": { "schema": "Message", "description": "Communication messages" },
+    "projects": { "schema": "Project", "description": "Active projects" },
+    "proposals": { "schema": "Proposal", "description": "Project proposals" },
+    "changeRequests": { "schema": "ChangeRequest", "description": "Scope change requests" },
+    "clientRequests": { "schema": "ClientRequest", "description": "Requests from clients" },
+    "deliverables": { "schema": "Deliverable", "description": "Project deliverables" },
+    "qaIssues": { "schema": "QAIssue", "description": "QA and testing issues" },
+    "waitingOnClient": { "schema": "WaitingOnClient", "description": "Items waiting on client" },
+    "clients": { "schema": "Client", "description": "List of clients" },
+    "invoices": { "schema": "Invoice", "description": "Project invoices" },
+    "transactions": { "schema": "Transaction", "description": "Financial transactions" },
+    "projectFiles": { "schema": "ProjectFile", "description": "Project files" },
+    "onboarding": { "schema": "Onboarding", "description": "Client onboarding data" },
+    "notifications": { "schema": "Notification", "description": "User notifications" },
+    "meetings": { "schema": "Meeting", "description": "Meeting sessions" },
+    "meetings/{meetingId}/participants": { "schema": "MeetingParticipant", "description": "Meeting participants" },
+    "meeting_messages": { "schema": "MeetingMessage", "description": "Meeting chat messages" },
+    "attendance": { "schema": "Attendance", "description": "Attendance logs" },
+    "audit_logs": { "schema": "AuditLog", "description": "Administrative audit logs" },
+    "settings": { "schema": "UserSettings", "description": "User specific settings" }
+  }
+}
